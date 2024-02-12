@@ -1,19 +1,28 @@
 using UnityEngine;
 using TMPro;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
+    // Variables for resources
     public int appleCount = 0;
     public int coinCount = 0;
     public int eggCount = 0;
-    private bool coopUnlocked = false;
 
+    // Coop-related variables
+    private bool coopUnlocked = false;
+    public TextMeshProUGUI coopUnlockText;
+
+    // Cooldown duration for egg collection
+    public float eggCooldownDuration = 180f;
+    private bool isEggCooldown = false;
+
+    // References to UI text elements
     public TextMeshProUGUI appleCounterText;
     public TextMeshProUGUI coinCounterText;
     public TextMeshProUGUI eggCounterText;
-    public TextMeshProUGUI coopUnlockText;
 
     private void Awake()
     {
@@ -27,12 +36,19 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        UpdateCounters();
+    }
+
     public void UpdateCounters()
     {
-        appleCounterText.text = appleCount.ToString();
-        coinCounterText.text = coinCount.ToString();
-        eggCounterText.text = eggCount.ToString();
+        appleCounterText.text = "Apples: " + appleCount;
+        coinCounterText.text = "Coins: " + coinCount;
+        eggCounterText.text = "Eggs: " + eggCount;
     }
+
+    // Functions to manage resources
 
     public void AddApples(int amount)
     {
@@ -40,53 +56,10 @@ public class GameManager : MonoBehaviour
         UpdateCounters();
     }
 
-    public int GetAppleCount()
+    public void AddCoins(int amount)
     {
-        return appleCount;
-    }
-
-    public bool CanHarvestApples()
-    {
-        return true;
-    }
-
-    public int SellApples()
-    {
-        int soldApples = appleCount;
-        int coinsEarned = soldApples * 2;
-        coinCount += coinsEarned;
-        appleCount -= soldApples;
+        coinCount += amount;
         UpdateCounters();
-        return coinsEarned;
-    }
-
-    public bool CanUnlockCoop()
-    {
-        return coinCount >= 20;
-    }
-
-    public void UnlockCoop()
-    {
-        if (CanUnlockCoop())
-        {
-            coinCount -= 20;
-            coopUnlocked = true;
-            UpdateCounters();
-            if (coopUnlockText != null)
-            {
-                Destroy(coopUnlockText.gameObject);
-            }
-        }
-    }
-
-    public int GetCoinCount()
-    {
-        return coinCount;
-    }
-
-    public int GetEggCount()
-    {
-        return eggCount;
     }
 
     public void AddEggs(int amount)
@@ -95,13 +68,52 @@ public class GameManager : MonoBehaviour
         UpdateCounters();
     }
 
-    public int SellEggs()
+    // Functions related to coop
+
+    public bool CanUnlockCoop()
     {
-        int soldEggs = coopUnlocked ? 3 : 0;
-        int coinsEarned = soldEggs * 3;
-        coinCount += coinsEarned;
-        eggCount -= soldEggs;
-        UpdateCounters();
-        return coinsEarned;
+        return coinCount >= 20 && !coopUnlocked;
+    }
+
+    public void UnlockCoop()
+    {
+        if (CanUnlockCoop())
+        {
+            coinCount -= 20;
+            coopUnlocked = true;
+
+            if (coopUnlockText != null)
+            {
+                Destroy(coopUnlockText.gameObject);
+            }
+
+            StartCoroutine(EggCooldown());
+        }
+    }
+
+    IEnumerator EggCooldown()
+    {
+        isEggCooldown = true;
+
+        yield return new WaitForSeconds(eggCooldownDuration);
+
+        isEggCooldown = false;
+    }
+
+    public bool IsEggCooldownActive()
+    {
+        return isEggCooldown;
+    }
+
+    // Methods to get apple and egg counts
+
+    public int GetAppleCount()
+    {
+        return appleCount;
+    }
+
+    public int GetEggCount()
+    {
+        return eggCount;
     }
 }
