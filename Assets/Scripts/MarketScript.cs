@@ -5,6 +5,9 @@ public class MarketScript : MonoBehaviour
     public int coinsToAddPerApple = 2;
     public int coinsToAddPerEgg = 1;
 
+    public AudioSource source;
+    public AudioClip clip;
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.tag == "Player")
@@ -18,6 +21,7 @@ public class MarketScript : MonoBehaviour
             GameManager.instance.AddEggs(-subtractedEggs);
             GameManager.instance.coinCount += coinsEarned;
             GameManager.instance.UpdateCounters();
+            source.PlayOneShot(clip);
         }
     }
 }

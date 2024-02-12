@@ -6,6 +6,10 @@ public class TreeScript : MonoBehaviour
 {
     public float cooldownDuration = 180f;
     private bool isCooldown = false;
+    public int applesToAdd = 5;
+
+    public AudioSource source;
+    public AudioClip clip;
 
     public TextMeshProUGUI cooldownText;
 
@@ -14,6 +18,7 @@ public class TreeScript : MonoBehaviour
         if (collision.tag == "Player" && !isCooldown)
         {
             int applesToAdd = 5;
+            source.PlayOneShot(clip);
             GameManager.instance.AddApples(applesToAdd);
             StartCoroutine(TreeCooldown());
         }
